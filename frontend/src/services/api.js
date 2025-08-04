@@ -1,24 +1,20 @@
+// frontend/src/services/api.js
+
 import axios from 'axios';
 
 const getBaseURL = () => {
-  const isBrowser = typeof window !== 'undefined';
-  const isLocalhost = isBrowser && window.location.hostname === 'localhost';
-
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-
-  if (isLocalhost) {
-    return 'http://localhost:5000/api';
-  }
-
-  // Fallback (in case nothing else is set)
-  return '/api';
+  const envURL = import.meta.env.VITE_API_URL;
+  // Use env var if set, else localhost
+  const raw = envURL || 'http://localhost:5000';
+  // Remove any trailing slash
+  const clean = raw.replace(/\/$/, '');
+  // Ensure it ends with /api
+  return clean.endsWith('/api') ? clean : `${clean}/api`;
 };
 
 const api = axios.create({
   baseURL: getBaseURL(),
-  withCredentials: true, // For cookie/session auth if used
+  withCredentials: true,
 });
 
 // Attach token from localStorage to each request
