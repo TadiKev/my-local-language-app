@@ -1,5 +1,3 @@
-// backend/src/server.js
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -15,9 +13,20 @@ const progressRoutes = require('./routes/progressRoutes');
 const app = express();
 connectDB();
 
+// ✅ Fix CORS: Allow localhost and deployed frontend
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        'http://localhost:5173',
+        'https://local-language-app.vercel.app',
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -35,6 +44,7 @@ app.use('/api/lessons', lessonRoutes);
 app.use('/api/voice', voiceRoutes);
 app.use('/api/progress', progressRoutes);
 
+// Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
